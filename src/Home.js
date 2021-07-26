@@ -16,6 +16,7 @@ class Home extends Component {
 		super(props)
 		this.state = {
 			url: '',
+			url1: ''
 		}
 		console.log(OBJ);
 	}
@@ -151,10 +152,10 @@ class Home extends Component {
 		//  var inputTime1 = new Date("09/07/2021 10:05:00 AM").getTime()
 		 console.log(inputTime1);
 
-		//  var date1 = new Date('2021.07.16 10:40');
-		//  var inputTime2 = Math.floor(date1.getTime() / 1000);
+		 var date1 = new Date('2021.07.16 10:40');
+		 var inputTime2 = Math.floor(date1.getTime() / 1000);
 		 //  var inputTime1 = new Date("09/07/2021 10:05:00 AM").getTime()
-		//   console.log(inputTime2);
+		console.log(inputTime2);
 		// 	const date2 = new Date(cred*1000);
 		// //	var date= cred;
 		// 	var hours = date2.getHours(); // minutes part from the timestamp
@@ -177,12 +178,26 @@ class Home extends Component {
 		
 		if (this.state.url !== "") {
 			var url = this.state.url.split("/")
-			window.location.href = `/${url[url.length-1]}`
+			window.location.href = `/videocon/${url[url.length-1]}`
 		} else {
 			var url = Math.random().toString(36).substring(2, 7)
-			window.location.href = `/${url}`
+			window.location.href = `/videocon/${url}`
 	} 
 }
+
+		urlChange = (f) => this.setState({ url1: f.target.value })
+
+
+		create = () => {
+			if (this.state.url1 !== "") {
+				var url1 = this.state.url1.split("/")
+				window.location.href = `/meeting/${url1}`
+			} else {
+				var url1 = Math.random().toString(36).substring(2, 7)
+				window.location.href = `/meeting/${url1}`
+		} 
+		}
+
 
 
 	render() {
@@ -211,8 +226,9 @@ class Home extends Component {
                     </div>
 					<div className="meetCreate">
 
-					<input placeholder="Enter meeting name here"  variant="outlined" onChange={e => this.handleChange(e)} />
-					<button variant="contained"  onClick={this.join} style={{ margin: "20px" }}>Create</button>
+					<input placeholder="Enter meeting name here"  variant="outlined" onChange={f => this.urlChange(f)} />
+  					<input type="datetime-local" id="birthdaytime" name="birthdaytime"></input>
+					<button variant="contained"  onClick={this.create} style={{ margin: "20px" }}>Create</button>
 
 					</div>
 				</div>
