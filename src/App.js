@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Video from './Video';
 import Home from './Home';
-// import Time from './Time';
+import Create from './Create';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 
 class App extends Component {
@@ -11,8 +11,8 @@ class App extends Component {
 				<Router>
 					<Switch>
 						<Route path="/" exact component={Home} />
-						<Route path="/:url" component={Video} />
-						{/* <Route path="/Time" exact component={Time} /> */}
+						<Route path="/videocon/:url" component={Video} />
+						<Route path="/meeting/:url1" component={Create} />
 					</Switch>
 				</Router>
 			</div>
