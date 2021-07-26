@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import io from 'socket.io-client';
+import * as io from 'socket.io-client';
 import faker from "faker";
-import { withRouter } from 'react-router-dom';
+
 
 import {OBJ} from './Schedule'; 
 import {IconButton, Badge, Input, Button} from '@material-ui/core'
@@ -12,7 +12,9 @@ import MicOffIcon from '@material-ui/icons/MicOff'
 import ScreenShareIcon from '@material-ui/icons/ScreenShare'
 import StopScreenShareIcon from '@material-ui/icons/StopScreenShare'
 import CallEndIcon from '@material-ui/icons/CallEnd'
-import ChatIcon from '@material-ui/icons/Chat'
+import ChatIcon from '@material-ui/icons/Chat';
+import FullscreenIcon from '@material-ui/icons/Fullscreen';
+import PeopleIcon from '@material-ui/icons/People';
 
 import { message } from 'antd'
 import 'antd/dist/antd.css'
@@ -22,16 +24,13 @@ import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css'
 import "./Video.css"
 
-var server_url = process.env.NODE_ENV === 'production' ? 'http://localhost:4001' : "http://localhost:4001"
+var server_url = process.env.NODE_ENV === 'production' ? 'http://localhost:4001' : "http://localhost:4001";
+
+var client_url = process.env.NODE_ENV === 'production' ? 'http://localhost:3000' : "http://localhost:3000";
 
 var connections = {}
 const peerConnectionConfig = 
-//{
-// 	'iceServers': [
-// 		// { 'urls': 'stun:stun.services.mozilla.com' },
-// 		{ 'urls': 'stun:stun.l.google.com:19302' },
-// 	]
-// }
+
 {
 
 	iceServers: [{ urls: ["stun:ss-turn2.xirsys.com"] },
@@ -66,13 +65,18 @@ class Video extends Component {
 			audio: false,
 			screen: false,
 			showModal: false,
+			showModal1: false,
 			screenAvailable: false,
 			messages: [],
 			message: "",
 			newmessages: 0,
 			askForUsername: true,
 			username: faker.internet.userName(),
-			hbfhb: "",
+			Name: "",
+			connections1: [],
+			userDetails: "",
+			userNames: "",
+			userNumbers: "",
 		}
 		console.log(this.state.userMeet);
 		connections = {}
@@ -84,7 +88,7 @@ class Video extends Component {
 	checkPermission = async() => {
 	const { history } = this.props;
 	var newArray = OBJ.Meeting.filter(function(value) {
-		return value.meetingTime === 1626764520
+		return value.meetingTime === 1627015200
 	}).map(function(value){return value.meetingTime});
 	console.log(newArray);
 	var cred;
@@ -121,7 +125,6 @@ class Video extends Component {
 
 
 	  			if(currentTime >= inputTime) {
-				localStorage.setItem("newChat", JSON.stringify("started"));
 			  	await	this.getPermissions();
 				}  else {
 				alert("The Meet doesn't start");
@@ -129,13 +132,6 @@ class Video extends Component {
 			} else {
 				alert("Invalid Meeting ID");
 				}
-			var storedContacts = JSON.parse(localStorage.getItem("newChat"));
-			console.log(storedContacts);
-			if(storedContacts === "started"){
-				console.log("Meeting is going on");
-			} else {
-				console.log("Meet has ended");
-			}
 		}
 
 	
@@ -352,16 +348,30 @@ class Video extends Component {
 		return {minWidth, minHeight, width, height}
 	}
 
+	connect = () => { 
+		this.setState({ askForUsername: false }, () => this.getMedia());
+		let name= this.state.username;
+		let users=[this.state.username];
+		let users1=[...users];
+		users1.push(name);
+		console.log(users1);
+	};
+
 	connectToSocketServer = () => {
 		socket = io.connect(server_url, { secure: true })
 
-		socket.on('signal', this.gotMessageFromServer)
+		socket.on('signal', this.gotMessageFromServer);
+
+		
 
 		socket.on('connect', () => {
 			socket.emit('join-call', window.location.href)
-			socketId = socket.id
+			socketId = socket.id;
+			
 
 			socket.on('chat-message', this.addMessage)
+
+			
 
 			socket.on('user-left', (id) => {
 				let video = document.querySelector(`[data-socket="${id}"]`)
@@ -375,6 +385,15 @@ class Video extends Component {
 			})
 
 			socket.on('user-joined', (id, clients) => {
+				console.log(clients);
+
+				socket.emit('new-user', this.state.username);
+
+				socket.on('user-array', (connections1) => {
+					this.setState({userDetails: connections1});
+					console.log(this.state.userDetails);
+				})
+
 				clients.forEach((socketListId) => {
 					connections[socketListId] = new RTCPeerConnection(peerConnectionConfig)
 					// Wait for their ice candidate       
@@ -483,7 +502,9 @@ class Video extends Component {
 		}
 	}
 
-	handleUsername = (e) => this.setState({ username: e.target.value })
+	handleUsername = (e) => {
+		this.setState({ username: e.target.value });
+	}
 
 	sendMessage = () => {
 		socket.emit('chat-message', this.state.message, this.state.username)
@@ -514,74 +535,189 @@ class Video extends Component {
 		})
 	}
 
-	connect = () => this.setState({ askForUsername: false }, () => this.getMedia())
+	
 
-	// isChrome = function () {
-	// 	let userAgent = (navigator && (navigator.userAgent || '')).toLowerCase()
-	// 	let vendor = (navigator && (navigator.vendor || '')).toLowerCase()
-	// 	let matchChrome = /google inc/.test(vendor) ? userAgent.match(/(?:chrome|crios)\/(\d+)/) : null
-	// 	// let matchFirefox = userAgent.match(/(?:firefox|fxios)\/(\d+)/)
-	// 	// return matchChrome !== null || matchFirefox !== null
-	// 	return matchChrome !== null
-	// }
+	toggleFullScreen= () => {
+		if (!document.fullscreenElement) {
+			document.documentElement.requestFullscreen(this.localVideoref);
+		} else {
+		  if (document.exitFullscreen) {
+			document.exitFullscreen();
+		  }
+		}
+	  }
+
+	 countTimers = () => {
+		var timerVar = setInterval(countTimer, 1000);
+		var totalSeconds = 0;
+		function countTimer() {
+		++totalSeconds;
+		var hour = Math.floor(totalSeconds /3600);
+		var minute = Math.floor((totalSeconds - hour*3600)/60);
+		var seconds = totalSeconds - (hour*3600 + minute*60);
+		if(hour < 10)
+		  hour = "0"+hour;
+		if(minute < 10)
+		  minute = "0"+minute;
+		if(seconds < 10)
+		  seconds = "0"+seconds;
+		document.getElementById("timer").innerHTML = hour + ":" + minute + ":" + seconds;
+		}
+	 }
+
+	 users = () => {
+		console.log(this.state.userDetails);
+	    var Details = this.state.userDetails.toString();
+		console.log(Details);
+		this.setState({userNames: Details});
+		var numberOfUsers = this.state.userDetails.length;
+		this.setState({userNumbers: numberOfUsers});
+		console.log(this.state.userNumbers);
+		this.setState({showModal1: true});
+	}
+
+	closeUser= () => {
+		this.setState({ showModal1: false })
+	}
+	 
 
 
 	render() {
-		// if(this.isChrome() === false){
-		// 	return (
-		// 		<div style={{background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
-		// 				textAlign: "center", margin: "auto", marginTop: "50px", justifyContent: "center"}}>
-		// 			<h1>Sorry, this works only with Google Chrome</h1>
-		// 		</div>
-		// 	)
-		// }
 		return (
 			<div>
 				{this.state.askForUsername === true ?
-					<div>
-						<div style={{background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
-								textAlign: "center", margin: "auto", marginTop: "50px", justifyContent: "center"}}>
-							<p style={{ margin: 0, fontWeight: "bold", paddingRight: "50px" }}>Set your username</p>
-							<Input placeholder="Username" value={this.state.username} onChange={e => this.handleUsername(e)} />
-							<Button variant="contained" color="primary" onClick={this.connect} style={{ margin: "20px" }}>Connect</Button>
+					<div className="joinPage">
+
+						<div className="videoBox">
+							<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
+								width: "700px",height: "450px"}}></video>
 						</div>
 
-						<div style={{ justifyContent: "center", textAlign: "center", paddingTop: "40px" }}>
-							<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
-								borderStyle: "solid",borderColor: "#bdbdbd",objectFit: "fill",width: "60%",height: "30%"}}></video>
+						<div className="videoContainer1">
+							<div className="videoContainer2" >
+
+								<p>Enter your username and create the meeting</p>
+								<input placeholder="username"  variant="filled" value={this.state.username} onChange={e => this.handleUsername(e)} />
+								<button variant="contained" color="primary" onClick={this.connect} style={{ margin: "20px" }}>Join</button>
+
+							</div>
+
+							<div className="videoContainer3">
+
+								<p>Meeting link</p>
+								<input  variant="filled" value={window.location.href} disable="true" />
+								<button variant="contained" color="primary" onClick={this.copyUrl} style={{ margin: "20px" }}>Copy</button>
+							
+							</div>
 						</div>
+
+						
 					</div>
 					:
 					<div>
-						<div className="btn-down" style={{ backgroundColor: "whitesmoke", color: "whitesmoke", textAlign: "center" }}>
-							<IconButton style={{ color: "#424242" }} onClick={this.handleVideo}>
-								{(this.state.video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
-							</IconButton>
+						<div className="btn-down">
+						</div>
+						<Row id="main" className="flex-container" style={{ margin: 0, padding: 0 }}>
+								<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
+									objectFit: "fill", width: "1206px",height: "510px"}}></video>
+							</Row>
+							
+							<div className="videoFooter">
 
-							<IconButton style={{ color: "#f44336" }} onClick={this.handleEndCall}>
-								<CallEndIcon />
-							</IconButton>
-
-							<IconButton style={{ color: "#424242" }} onClick={this.handleAudio}>
+							<div className="videoTimer">
+							<span className="url">{this.state.userMeet}</span>
+							<span className="constant">|</span>
+							<span id="timer" ref={this.countTimers}></span>
+							</div>
+							
+							<div className="micDiv">
+							<span className="Mic"><IconButton style={{ color: "#424242" }} onClick={this.handleAudio}>
 								{this.state.audio === true ? <MicIcon /> : <MicOffIcon />}
-							</IconButton>
+							</IconButton></span>
+							<span className="micText"><p>Mic</p></span>
+							</div>
+							
+							
+							<div className="videoDiv">
+							<span className="Videocam"><IconButton style={{ color: "#424242" }} onClick={this.handleVideo}>
+								{(this.state.video === true) ? <VideocamIcon /> : <VideocamOffIcon />}
+								</IconButton></span>
+							<span className="videoText"><p>Video</p></span>
+							</div>
+							
+					
+							<div className="callEndDiv">
+							<span className="callEnd"><IconButton style={{ color: "#f44336" }} onClick={this.handleEndCall}>
+								<CallEndIcon />
+							</IconButton></span>
+							<span className="callEndText"><p>End Call</p></span>
+							</div>
+							
+							
 
-							{this.state.screenAvailable === true ?
+							<div className="screenShareDiv">
+							<span className="screenShare">{this.state.screenAvailable === true ?
 								<IconButton style={{ color: "#424242" }} onClick={this.handleScreen}>
 									{this.state.screen === true ? <ScreenShareIcon /> : <StopScreenShareIcon />}
 								</IconButton>
 								: null}
+								</span>
+								<span className="screenShareText"><p>Screen Share</p></span>
+							</div>
 
-							<Badge badgeContent={this.state.newmessages} max={999} color="secondary" onClick={this.openChat}>
+							<div className="participantDiv">
+							<span className="participant">
+								<IconButton style={{ color: "#424242" }} onClick={this.users}>
+									<PeopleIcon />
+								</IconButton>
+							</span>
+							<span className="participantText">
+								<p>Participants</p>
+								</span>
+							</div>
+							
+							<div className="chatIconDiv">
+							<span className="chatIcon"><Badge badgeContent={this.state.newmessages} max={999} color="secondary" onClick={this.openChat}>
 								<IconButton style={{ color: "#424242" }} onClick={this.openChat}>
 									<ChatIcon />
 								</IconButton>
-							</Badge>
-						</div>
+							</Badge></span>
+							<span className="chatIconText"><p>Chat</p></span>
+							</div>
 
-						<Modal show={this.state.showModal} onHide={this.closeChat} style={{ zIndex: "999999" }}>
-							<Modal.Header closeButton>
-								<Modal.Title>Chat Room</Modal.Title>
+							<div className="fullScreenDiv">
+							<span className="fullScreen">
+								<IconButton style={{ color: "#424242" }} onClick={this.toggleFullScreen}>
+									< FullscreenIcon />
+								</IconButton>
+							</span>
+							<span className="fullScreenText"><p>Full Screen</p></span>
+							</div>
+							</div>
+							
+					<div className="user-container">
+						<Modal className="user" show={this.state.showModal1} onHide={this.closeUser} style={{ zIndex: "999999" }}>
+							<Modal.Header className="userHeader">
+								<div className = "userTitle">
+								<Modal.Title>Participants</Modal.Title>
+								<div className="userStatic">
+								<p>{this.state.userNumbers}</p>
+								<p>participants</p>
+								</div>
+								</div>
+								<button onClick={this.closeUser}></button>
+							</Modal.Header>
+							<Modal.Body className="userBody" style={{ overflow: "auto", overflowY: "auto", height: "500px", textAlign: "left" }} >
+								<p>{this.state.userNames}</p>
+							</Modal.Body>
+						</Modal>
+					</div>
+						
+					<div className="popup-container">
+						<Modal className="popup" show={this.state.showModal} onHide={this.closeChat} style={{ zIndex: "999999" }}>
+							<Modal.Header className="modelHeader">
+								<Modal.Title>Chat</Modal.Title>
+								<button onClick={this.closeChat}></button>
 							</Modal.Header>
 							<Modal.Body style={{ overflow: "auto", overflowY: "auto", height: "400px", textAlign: "left" }} >
 								{this.state.messages.length > 0 ? this.state.messages.map((item, index) => (
@@ -591,30 +727,20 @@ class Video extends Component {
 								)) : <p>No message yet</p>}
 							</Modal.Body>
 							<Modal.Footer className="div-send-msg">
-								<Input placeholder="Message" value={this.state.message} onChange={e => this.handleMessage(e)} />
-								<Button variant="contained" color="primary" onClick={this.sendMessage}>Send</Button>
+								<input placeholder="Type your message here.."  variant="filled" value={this.state.message} onChange={e => this.handleMessage(e)} />
+								<button variant="contained" color="primary" onClick={this.sendMessage}></button>
 							</Modal.Footer>
 						</Modal>
-
-						<div className="container">
-							<div style={{ paddingTop: "20px" }}>
-								<Input value={window.location.href} disable="true"></Input>
-								<Button style={{backgroundColor: "#3f51b5",color: "whitesmoke",marginLeft: "20px",
-									marginTop: "10px",width: "120px",fontSize: "10px"
-								}} onClick={this.copyUrl}>Copy invite link</Button>
-							</div>
-
-							<Row id="main" className="flex-container" style={{ margin: 0, padding: 0 }}>
-								<video id="my-video" ref={this.localVideoref} autoPlay muted style={{
-									borderStyle: "solid",borderColor: "#bdbdbd",margin: "10px",objectFit: "fill",
-									width: "100%",height: "100%"}}></video>
-							</Row>
-						</div>
 					</div>
+						
+
+							
+						
+						</div>
 				}
 			</div>
 		)
 	}
 }
 
-export default Video
+export default Video;
