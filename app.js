@@ -5,6 +5,8 @@ const app = express()
 const bodyParser = require('body-parser')
 const path = require("path")
 var xss = require("xss")
+const mongoose=require('mongoose');
+const routes =require('./backend/routes');
 
 var server = http.createServer(app)
 var io = require('socket.io')(server, {
@@ -15,6 +17,7 @@ var io = require('socket.io')(server, {
 
 app.use(cors())
 app.use(bodyParser.json())
+app.use('/api',routes);
 
 if(process.env.NODE_ENV==='production'){
 	app.use(express.static(__dirname+"/build"))
@@ -28,11 +31,17 @@ sanitizeString = (str) => {
 	return xss(str)
 }
 
-connections = {}
-messages = {}
-timeOnline = {}
+users= {};
+users1= {};
+connections = {};
+connections1 = {};
+messages = {};
+timeOnline = {};
+
 
 io.on('connection', (socket) => {
+
+	
 
 	socket.on('join-call', (path) => {
 		if(connections[path] === undefined){
@@ -54,6 +63,15 @@ io.on('connection', (socket) => {
 		}
 
 		console.log(path, connections[path])
+	})
+
+	socket.on('new-user', (username) => {
+		if(connections1[path] === undefined){
+			connections1[path] = []
+		}
+		connections1[path].push(username);
+		console.log(connections1[path])
+		socket.emit("user-array", connections1[path]);
 	})
 
 	socket.on('signal', (toId, message) => {
@@ -117,3 +135,5 @@ io.on('connection', (socket) => {
 server.listen(app.get('port'), () => {
 	console.log("listening on", app.get('port'))
 })
+
+mongoose.connect('mongodb+srv://demo:E8wxFGqeJz0VkKWm@cluster0.jrdfh.mongodb.net/metting?retryWrites=true&w=majority',   {useNewUrlParser: true,  useUnifiedTopology: true})
