@@ -28,8 +28,71 @@ body {
   margin-top: 100px;
 }
 
-.container3 button {
+.container3 p {
+  font-family: 'Rubik', sans-serif;
+  color: #1C1718;
+  font-weight: 400px;
+}
+
+.meetJoin button {
   background-color: #2CB3AE;
   width: 102px;
   height: 50px;
+  left: 359px;
+  border: 1px solid #2CB3AE;
+  font-family: 'Rubik', sans-serif;
+  color: #FFFFFF;
+  font-weight: 500px;
+}
+
+.meetJoin input {
+  width: 335px;
+  height: 50px;
+  background-color: #F1F4F3;
+  border: 1px solid #F1F4F3;
+  font-family: 'Rubik', sans-serif;
+  color: #544547;
+  font-weight: 400px;
+}
+
+.meetCreate button {
+  background-color: #EC5167;
+  width: 102px;
+  height: 50px;
+  left:359px;
+  border: 1px solid #EC5167;
+  font-family: 'Rubik', sans-serif;
+  color: #FFFFFF;
+  font-weight: 500px;
+}
+
+.meetCreate input {
+  width: 335px;
+  height: 50px;
+  background-color: #F1F4F3;
+  border: 1px solid #F1F4F3;
+  font-family: 'Rubik', sans-serif;
+  color: #544547;
+  font-weight: 400px;
+}
+
+.division {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  width: 400px;
+  font-size: 20px;
+}
+
+.division1 {
+  height: 1px;
+  width: 230px;
+  background: #e2e0e0;
+}
+
+.division2 {
+  height: 1px;
+  width: 230px;
+  background: #e2e0e0;
 }
