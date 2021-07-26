@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
 import {OBJ} from './Schedule'; 
 import { Input, Button, IconButton } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core';
+import TextField from '@material-ui/core/TextField';
 import "./Home.css"
  
-
+const useStyles = makeStyles({
+	textField: {
+	  paddingTop: "500px"
+	},
+});
 
 class Home extends Component {
   	constructor (props) {
@@ -140,7 +146,7 @@ class Home extends Component {
 
 		// get input time
 		
-		var date = new Date('2021.07.20 12:32');
+		var date = new Date('2021.07.23 10:10');
 		var inputTime1 = Math.floor(date.getTime() / 1000);
 		//  var inputTime1 = new Date("09/07/2021 10:05:00 AM").getTime()
 		 console.log(inputTime1);
@@ -183,16 +189,32 @@ class Home extends Component {
 		return (
 			<div className="container2">
 				
-				<div>
+				<div className="boxHead">
 					<h1 style={{ fontSize: "45px" }}>Video Meeting</h1>
 					<p style={{ fontWeight: "200" }}>Video conference website that lets you stay in touch with all your friends.</p>
 				</div>
 
 				<div className="container3">
 					<p style={{ margin: 0, fontWeight: "bold", paddingRight: "50px" }}>Join or create a new meeting</p>
-					<Input placeholder="Enter meeting URL here" onChange={e => this.handleChange(e)} />
-					
-					<button variant="contained"  onClick={this.join} style={{ margin: "20px" }}></button>
+					<div className="meetJoin">
+
+					<input placeholder="Enter meeting URL here"  variant="outlined"  onChange={e => this.handleChange(e)} />
+					<button variant="contained"  onClick={this.join} style={{ margin: "20px" }}>Join</button>
+
+					</div>
+					<div className="division">
+
+                      <span className="division1"></span>
+                      <span>or</span>
+                      <span className="division2"></span>
+
+                    </div>
+					<div className="meetCreate">
+
+					<input placeholder="Enter meeting name here"  variant="outlined" onChange={e => this.handleChange(e)} />
+					<button variant="contained"  onClick={this.join} style={{ margin: "20px" }}>Create</button>
+
+					</div>
 				</div>
 				<div style={{
 					background: "white", width: "30%", height: "auto", padding: "20px", minWidth: "400px",
