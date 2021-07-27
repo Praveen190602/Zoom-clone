@@ -16,14 +16,14 @@ class Home extends Component {
 		super(props)
 		this.state = {
 			url: '',
-			url1: ''
+			url1: '',
+			Time: '',
+			Time1: ''
 		}
 		console.log(OBJ);
 	}
 
 	handleChange = (e) => this.setState({ url: e.target.value })
-
-	
 
 	
 
@@ -185,6 +185,7 @@ class Home extends Component {
 	} 
 }
 
+
 		urlChange = (f) => this.setState({ url1: f.target.value })
 
 
@@ -196,6 +197,10 @@ class Home extends Component {
 				var url1 = Math.random().toString(36).substring(2, 7)
 				window.location.href = `/meeting/${url1}`
 		} 
+		var element = document.getElementById("startDate").value;
+		console.log(element);
+		var element1 = document.getElementById("endDate").value;
+		console.log(element1);
 		}
 
 
@@ -227,7 +232,8 @@ class Home extends Component {
 					<div className="meetCreate">
 
 					<input placeholder="Enter meeting name here"  variant="outlined" onChange={f => this.urlChange(f)} />
-  					<input type="datetime-local" id="birthdaytime" name="birthdaytime"></input>
+  					<input id="startDate" type="datetime-local"  ></input>
+					<input id="endDate" type="datetime-local"  ></input>
 					<button variant="contained"  onClick={this.create} style={{ margin: "20px" }}>Create</button>
 
 					</div>
