@@ -201,6 +201,8 @@ class Home extends Component {
 		console.log(element);
 		var element1 = document.getElementById("endDate").value;
 		console.log(element1);
+		var userName = document.getElementById("username").value;
+		console.log(userName);
 		}
 
 
@@ -232,6 +234,7 @@ class Home extends Component {
 					<div className="meetCreate">
 
 					<input placeholder="Enter meeting name here"  variant="outlined" onChange={f => this.urlChange(f)} />
+					<input id="username" placeholder="Enter username" variant="contained"></input>
   					<input id="startDate" type="datetime-local"  ></input>
 					<input id="endDate" type="datetime-local"  ></input>
 					<button variant="contained"  onClick={this.create} style={{ margin: "20px" }}>Create</button>
