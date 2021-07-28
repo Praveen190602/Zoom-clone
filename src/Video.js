@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import * as io from 'socket.io-client';
 import faker from "faker";
 
-
+import axios from 'axios'
 import {OBJ} from './Schedule'; 
 import {IconButton, Badge, Input, Button} from '@material-ui/core'
 import VideocamIcon from '@material-ui/icons/Videocam'
@@ -15,7 +15,7 @@ import CallEndIcon from '@material-ui/icons/CallEnd'
 import ChatIcon from '@material-ui/icons/Chat';
 import FullscreenIcon from '@material-ui/icons/Fullscreen';
 import PeopleIcon from '@material-ui/icons/People';
-
+import { Route } from 'react-router-dom'
 import { message } from 'antd'
 import 'antd/dist/antd.css'
 
@@ -23,6 +23,9 @@ import { Row } from 'reactstrap'
 import Modal from 'react-bootstrap/Modal'
 import 'bootstrap/dist/css/bootstrap.css'
 import "./Video.css"
+
+
+// import {toast} from 
 
 var server_url = process.env.NODE_ENV === 'production' ? 'http://localhost:4001' : "http://localhost:4001";
 
@@ -51,6 +54,7 @@ var elms = 0
 
 
 class Video extends Component {
+	_isMounted = false;
 	constructor(props) {
 		super(props)
 
@@ -77,62 +81,212 @@ class Video extends Component {
 			userDetails: "",
 			userNames: "",
 			userNumbers: "",
+			url : "",
+			startTime1 :"",
+			endTime1 :"",
+			endTime2 :"",
+			difference:"",
+			showPopup : false,
+			url5:this.props.match.params.url,
+			host:""
+
 		}
+		this.schedule()
 		console.log(this.state.userMeet);
 		connections = {}
 		// this.getPermissions();
-		this.checkPermission();
+		//this.checkPermission();
 		
 	}
 
-	checkPermission = async() => {
-	const { history } = this.props;
-	var newArray = OBJ.Meeting.filter(function(value) {
-		return value.meetingTime === 1627015200
-	}).map(function(value){return value.meetingTime});
-	console.log(newArray);
-	var cred;
-	newArray.forEach(function(e) {
-		cred = e.toString()
-	})
-	console.log(cred);
+	
+	
+  	schedule = async() =>{
 
-	var newArray1 = OBJ.Meeting.filter(function(value) {
-		return value.id === "fgh"
-	}).map(function(value){return value.id});
-	console.log(newArray1);
-	var cred1;
-	newArray1.forEach(function(e) {
-		cred1 = e.toString()
-	})
-	console.log(cred1);
+		const data = {
+			mettingId : this.state.userMeet
+		}
+		console.log(data)
+		// let url = ''
+		// let startTime1 = ''
+		// let endTime1 = ''
+	   await axios.post('http://localhost:4001/api/getschedule',data)
+		.then(res=>{
+			if (this._isMounted) {
+				if(res.data.StatusCode== 200){
+			console.log(res.data.MeetingDetails)
+			this.setState({
+				url:res.data.MeetingDetails.mettingId,
+				startTime1:res.data.MeetingDetails.startTime,
+				endTime1:res.data.MeetingDetails.endTime,
+				host:res.data.MeetingDetails.host
+			})
+		}
+		else{
+			alert('Invalid Meeting ID')
+		}
+		}
+			//  url = res.data.MeetingDetails.mettingId
+			//  startTime1 = res.data.MeetingDetails.startTime
+			//  endTime1 = res.data.MeetingDetails.endTime
+		})
+	}
 
-	if(this.state.userMeet === cred1) {
-		//	get system local time
+
+	
+	checkPermission = async () => {
 		
-		const date1 = new Date();
-		const time = date1.toTimeString().split(' ')[0].split(':');
-		var currentTime = (time[0] + ':' + time[1])
-		console.log(currentTime);
+		console.log(this.state.startTime1,this.state.endTime1,this.state.url)
+		const { history } = this.props;
+		var newArray1 = OBJ.Meeting.filter(function (value) {
+			return value.id === "fgh"
+		}).map(function (value) { return value.id });
+		console.log(newArray1);
+		var cred1;
+		newArray1.forEach(function (e) {
+			cred1 = e.toString()
+		})
+		console.log(cred1);
 
-		// get input time
+
 		
-			const date2 = new Date(cred*1000);
+
+		if (this.state.userMeet === this.state.url ) {
+			//	get system local time
+			const date1 = new Date();
+			const time = date1.toTimeString().split(' ')[0].split(':');
+			var currentTime = (time[0] + ':' + time[1])
+			console.log(currentTime);
+
+			// get input time 
+			//start time
+			const pad = num => ("0" + num).slice(-2);
+			const date2 = new Date(this.state.startTime1 * 1000);
 			var hours = date2.getHours(); // minutes part from the timestamp
 			var minutes = date2.getMinutes(); // seconds part from the timestamp
-			var inputTime = hours + ':' + minutes;
+			var inputTime = pad(hours) + ':' + pad(minutes);
 			console.log(inputTime);
 
+			// //end time
+			// const pad = num => ("0" + num).slice(-2);
+			const date3 = new Date(this.state.endTime1 * 1000);
+			var hours = date3.getHours(); // minutes part from the timestamp
+			var minutes = date3.getMinutes(); // seconds part from the timestamp
+			var inputTime2 = pad(hours) + ':' + pad(minutes);
+			console.log(inputTime2);
 
-	  			if(currentTime >= inputTime) {
-			  	await	this.getPermissions();
-				}  else {
-				alert("The Meet doesn't start");
-					} 
-			} else {
-				alert("Invalid Meeting ID");
+			
+			if (currentTime >= inputTime && currentTime < inputTime2) {
+				if(this.state.userDetails.indexOf(this.state.host)!==-1){
+				await this.getPermissions();
 				}
+				else{
+					console.log("Waiting for host to start Meeting!!! ")
+				}
+                this.getPermissions();
+		 } else if (currentTime >= inputTime2) {
+                window.location.href = "/meetEnd"
+				//alert("The Meet End!!");
+			}
+			else {
+				alert("The Meet doesn't start");
+			}
+		} else {
+			alert("Invalid Meeting ID");
 		}
+		// var storedContacts = JSON.parse(localStorage.getItem("newChat"));
+		// console.log(storedContacts);
+		// if (storedContacts === "started") {
+		// 	console.log("Meeting is going on");
+		// } else {
+		// 	console.log("Meet has ended");
+		// }
+
+	}
+
+	async  componentDidMount() {
+		try{
+			this._isMounted = true;
+		
+			  setTimeout(() => {
+				this.checkPermission()
+			}, 2000);
+			
+		 await setTimeout(()=>{
+				var endTime = this.state.endTime1
+				var date = new Date();
+				var currentTime = Math.floor(date.getTime() / 1000);
+				console.log(currentTime)
+				var diff = endTime - currentTime
+				console.log(diff)
+				this.setState({difference:diff}
+					,
+					()=>{
+						this.diff(this.state.difference)
+					}
+					)
+				var rem5 = (diff - 300) 
+				this.setState({endTime2:rem5} // 12:40 - 12:53  = 13 - 5 = 48
+					,    
+					()=>{
+						this.end(this.state.endTime2)
+					}
+					)
+			},2000);
+		//    setTimeout(() => {
+	// 		console.log("Meeting Will Ended in 5mins")
+	// 	}, this.state.endTime2);//0 
+	}
+	catch(err){
+         
+	}
+
+}
+		// setTimeout(() => {
+		// 	this.checkPermission()
+		// }, diff*1000);
+	
+
+	componentWillUnmount() {
+		this._isMounted = false;
+		
+	  }
+	  end = (e) =>{
+        console.log("rem 5min " + e)
+			   setTimeout(() => {
+				 this.togglePop()
+			console.log("Meeting Will Ended in 5mins")
+		}, e*1000);
+	   
+	  }
+
+	  togglePop(){
+		this.setState({
+		  showPopup : !this.state.showPopup
+		});
+	}
+	  diff = (e) =>{
+        console.log("end in "+e)
+			   setTimeout(() => {
+				   this.checkPermission()
+			console.log("Meeting Ended ")
+		}, e*1000);
+	   
+	  }
+
+	  checkPermission1 = () =>{
+
+		this.getPermissions()
+		console.log(this.state.userDetails,this.state.host)
+		  if(this.state.userDetails.indexOf(this.state.host)!==-1){
+			   console.log("Meeting Start")
+				 this.getPermissions();
+			}
+			else{
+					console.log("Waiting for host to start Meeting!!! ")
+				}
+	  }
+
 
 	
 	getPermissions = async () => {
@@ -152,7 +306,7 @@ class Video extends Component {
 			}
 
 			if (this.videoAvailable || this.audioAvailable) {
-				navigator.mediaDevices.getUserMedia({ video: this.videoAvailable, audio: this.audioAvailable })
+			await navigator.mediaDevices.getUserMedia({ video: this.videoAvailable, audio: this.audioAvailable })
 					.then((stream) => {
 						window.localStream = stream
 						this.localVideoref.current.srcObject = stream
@@ -325,8 +479,8 @@ class Video extends Component {
 		let height = String(100 / elms) + "%"
 		let width = ""
 		if(elms === 0 || elms === 1) {
-			width = "100%"
-			height = "100%"
+			width = "700px"
+			height = "450px"
 		} else if (elms === 2) {
 			width = "45%"
 			height = "100%"
@@ -349,13 +503,20 @@ class Video extends Component {
 	}
 
 	connect = () => { 
+
+	
 		this.setState({ askForUsername: false }, () => this.getMedia());
 		let name= this.state.username;
 		let users=[this.state.username];
 		let users1=[...users];
 		users1.push(name);
 		console.log(users1);
+		
 	};
+
+	diff1 = () =>{
+		this.checkPermission1()
+	}
 
 	connectToSocketServer = () => {
 		socket = io.connect(server_url, { secure: true })
@@ -390,8 +551,11 @@ class Video extends Component {
 				socket.emit('new-user', this.state.username);
 
 				socket.on('user-array', (connections1) => {
-					this.setState({userDetails: connections1});
-					console.log(this.state.userDetails);
+					this.setState({userDetails: connections1},
+						()=>{
+							this.diff1(this.state.userDetails)
+						}
+						);
 				})
 
 				clients.forEach((socketListId) => {
@@ -584,7 +748,12 @@ class Video extends Component {
 
 	render() {
 		return (
-			<div>
+           <div>
+              {/* {this.state.showPopup} ? <Popup closePopup = {this.togglePop}></Popup> : "" */}
+
+
+
+
 				{this.state.askForUsername === true ?
 					<div className="joinPage">
 
