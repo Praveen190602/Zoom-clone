@@ -376,10 +376,6 @@ class Video extends Component {
 					tracks.forEach(track => track.stop())
 				} catch(e) { console.log(e) }
 
-				let blackSilence = (...args) => new MediaStream([this.black(...args), this.silence()])
-				window.localStream = blackSilence()
-				this.localVideoref.current.srcObject = window.localStream
-
 				for (let id in connections) {
 					connections[id].addStream(window.localStream)
 
