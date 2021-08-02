@@ -103,10 +103,10 @@ input[type="radio"]{
   overflow: hidden;
 }
 
-/* .schedule button {
-  height: 70px;
-  width: 100px;
-} */
+.schedule button {
+  height: 50px;
+  width: 400px;
+}
 
 
 .Meeting-container {
@@ -302,4 +302,254 @@ form .field input:focus::placeholder{
   background-color: #2CB3AE;
   border: 1px solid #2CB3AE;
   color: white;
+}
+
+.settingsTag {
+    display: flex;
+    flex-direction: row;
+}
+
+.settingsTag p {
+  margin-top: 8px;
+  margin-left: 140px;
+  width: 200px;
+  font-family: 'Rubik', sans-serif;
+  color: #544547;
+}
+
+.settingsHeader button {
+    width: 20px;
+    height: 20px;
+    margin-top: 10px;
+    margin-left: 100px;
+    background-color: transparent;
+    border: 1px solid #fff;
+}
+
+.settingsFooter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.settingsFooter button {
+  width: 100px;
+  height: 42px;
+  background-color: #2CB3AE;
+  border: 1px solid #2CB3AE;
+  color: white;
+}
+
+
+										
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 90px;
+  height: 34px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 44px;
+  height: 20px;
+  background-color: #BFBFBF;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  left: 4px;
+  top: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #EC5167;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+
+
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(25px);
+  -ms-transform: translateX(25px);
+  transform: translateX(25px);
+}
+
+/*------ ADDED CSS ---------*/
+.on
+{
+  display: none;
+}
+
+.on, .off
+{
+  color: white;
+  position: absolute;
+  transform: translate(-10%,-10%);
+  top: 50%;
+  left: 50%;
+  font-size: 10px;
+  font-family: Verdana, sans-serif;
+}
+
+input:checked+ .slider .on
+{display: block;}
+
+input:checked + .slider .off
+{display: none;}
+
+/*--------- END --------*/
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;}
+
+.div1 {
+  display: flex;
+  flex-direction: row;
+}
+  
+.div1Text{
+  width: 100px;
+  height: 26px;
+  margin-left: 10px;
+}
+
+.div1Text p {
+  width: 150px;
+  font-family: 'Rubik', sans-serif;
+  color: #1C1718;
+}
+
+
+.div1switch {
+  margin-left: 240px;
+}
+
+.div2 {
+  display: flex;
+  flex-direction: row;
+}
+
+.div2Text {
+  width: 139px;
+  height: 26px;
+  margin-left: 10px;
+}
+
+.div2Text p {
+  font-family: 'Rubik', sans-serif;
+  color: #1C1718;
+}
+
+.div2switch {
+  margin-left: 200px;
+}
+
+.div3 {
+  display: flex;
+  flex-direction: row;
+}
+
+.div3Text {
+  width: 139px;
+  height: 26px;
+  margin-left: 10px;
+}
+
+.div3Text p {
+  width: 250px;
+  font-family: 'Rubik', sans-serif;
+  color: #1C1718;
+}
+
+.div3switch {
+  margin-left: 200px;
+}
+
+.div4 {
+  display: flex;
+  flex-direction: row;
+}
+
+.div4Text {
+  width: 139px;
+  height: 26px;
+  margin-left: 10px;
+}
+
+.div4Text p {
+  width: 200px;
+  font-family: 'Rubik', sans-serif;
+  color: #1C1718;
+}
+
+.div4switch {
+  margin-left: 200px;
+}
+
+.div5 {
+  display: flex;
+  flex-direction: row;
+}
+
+.div5Text {
+  width: 139px;
+  height: 26px;
+  margin-left: 10px;
+}
+
+.div5Text p {
+  width: 250px;
+  font-family: 'Rubik', sans-serif;
+  color: #1C1718;
+}
+
+.div5switch {
+  margin-left: 200px;
+}
+
+.div6 {
+  display: flex;
+  flex-direction: row;
+}
+
+.div6Text {
+  width: 139px;
+  height: 26px;
+  margin-left: 10px;
+}
+
+.div6Text p {
+  width: 250px;
+  font-family: 'Rubik', sans-serif;
+  color: #1C1718;
+}
+
+.div6switch {
+  margin-left: 200px;
 }
